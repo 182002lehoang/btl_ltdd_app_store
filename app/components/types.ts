@@ -13,7 +13,20 @@ export type RootStackParamList = {
     Cosmetics: undefined;
     ShoppingCart: undefined;
     SettingScreen: undefined;
-    OdersScreen: undefined;
+    OdersScreen: {
+        orderDetails: {
+            products: Array<{
+                image: string;
+                product_id: string;
+                product_name: string;
+                price: number;
+                quantity_pur: number;
+            }>;
+            address: Address;
+            shippingOption: string;
+            totalAmount: number;
+        };
+    };
     CheckoutScreen: {
         products?: Array<{
             image: string;

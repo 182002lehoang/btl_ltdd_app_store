@@ -68,6 +68,8 @@ const CheckoutScreen = () => {
     }
 
 
+
+
     return (
         <ScrollView style={styles.container}>
             <View style={styles.header}>
@@ -181,9 +183,32 @@ const CheckoutScreen = () => {
 
 
             {/* Place Order Button */}
-            <Pressable style={styles.placeOrderButton}>
+            {/* <Pressable style={styles.placeOrderButton} >
+                <Text style={styles.placeOrderButtonText}>Đặt hàng</Text>
+            </Pressable> */}
+            <Pressable
+                style={styles.placeOrderButton}
+                onPress={() => {
+                    if (!selectedAddress || !shippingOption) {
+                        alert('Vui lòng chọn địa chỉ và tùy chọn giao hàng');
+                        return;
+                    }
+                    navigation.navigate('OdersScreen', {
+                        orderDetails: {
+                            products: products ?? [],
+                            address: selectedAddress,
+                            shippingOption,
+                            totalAmount: (
+                                (products ?? []).reduce((sum, product) => sum + product.price * product.quantity_pur, 0) +
+                                (shippingOption.includes('1') ? 20000 : 50000)
+                            ),
+                        },
+                    });
+                }}
+            >
                 <Text style={styles.placeOrderButtonText}>Đặt hàng</Text>
             </Pressable>
+
 
             {/* Shipping Options Modal */}
             <Modal
