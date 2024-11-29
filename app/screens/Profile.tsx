@@ -64,9 +64,9 @@ const Profile = ({ setIsLoggedIn }: { setIsLoggedIn: React.Dispatch<React.SetSta
                 <View style={{ height: 5, backgroundColor: '#f0f8ff' }}></View>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' , padding:10}}>
                     <Text style={styles.title2}>Đơn hàng của tôi</Text>
-                    {/* <Pressable onPress={() => navigation.navigate('OdersScreen')}>
+                    <Pressable onPress={() => navigation.navigate('OdersScreen')}>
                         <Text style={styles.title3}>Xem tất cả đơn hàng</Text>
-                    </Pressable> */}
+                    </Pressable>
                 </View>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-around' , padding:10}}>
                     <Pressable style={{ flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>

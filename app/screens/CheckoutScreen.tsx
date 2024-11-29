@@ -9,6 +9,7 @@ import { selectAddresses, fetchAddresses } from '../redux/addressSlice';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchShippingOptions } from '../redux/shippingOptionsSlice';
 import { TextInput } from 'react-native-gesture-handler';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type CheckoutRouteProp = RouteProp<RootStackParamList, 'CheckoutScreen'>;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'AddressBookScreen'>;
@@ -19,6 +20,8 @@ const CheckoutScreen = () => {
     const dispatch = useDispatch();
     const { products } = route.params;
     const { selectedAddress, setSelectedAddress } = useAddressSelection();
+
+    console.log("selectedAddress", selectedAddress)
 
     useEffect(() => {
         dispatch(fetchAddresses() as never);
@@ -66,9 +69,6 @@ const CheckoutScreen = () => {
             </View>
         );
     }
-
-
-
 
     return (
         <ScrollView style={styles.container}>
@@ -186,7 +186,7 @@ const CheckoutScreen = () => {
             {/* <Pressable style={styles.placeOrderButton} >
                 <Text style={styles.placeOrderButtonText}>Đặt hàng</Text>
             </Pressable> */}
-            <Pressable
+            {/* <Pressable
                 style={styles.placeOrderButton}
                 onPress={() => {
                     if (!selectedAddress || !shippingOption) {
@@ -204,6 +204,43 @@ const CheckoutScreen = () => {
                             ),
                         },
                     });
+                }}
+            >
+                <Text style={styles.placeOrderButtonText}>Đặt hàng</Text>
+            </Pressable> */}
+
+            <Pressable
+                style={styles.placeOrderButton}
+                onPress={async () => {
+                    if (!selectedAddress || !shippingOption) {
+                        alert('Vui lòng chọn địa chỉ và tùy chọn giao hàng');
+                        return;
+                    }
+
+                    const orderDetails = {
+                        products: products ?? [],
+                        address: selectedAddress,
+                        shippingOption,
+                        totalAmount: (
+                            (products ?? []).reduce((sum, product) => sum + product.price * product.quantity_pur, 0) +
+                            (shippingOption.includes('1') ? 20000 : 50000)
+                        ),
+                    };
+
+                    try {
+                        // Lưu dữ liệu vào AsyncStorage
+                        const storedOrders = JSON.parse(await AsyncStorage.getItem('orders') || '[]');
+                        const updatedOrders = [...storedOrders, orderDetails];
+                        await AsyncStorage.setItem('orders', JSON.stringify(updatedOrders));
+
+                        console.log('Đơn hàng đã được lưu vào AsyncStorage:', updatedOrders);
+                        console.log("order", storedOrders)
+
+                        // Chuyển sang màn hình OrderScreen
+                        navigation.navigate('OdersScreen', { orderDetails });
+                    } catch (error) {
+                        console.error('Lỗi khi lưu đơn hàng:', error);
+                    }
                 }}
             >
                 <Text style={styles.placeOrderButtonText}>Đặt hàng</Text>

@@ -13,5 +13,5 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
-, "components/StackNavigator.js", "screens/Signup.js"  ]
+, "components/StackNavigator.js", "screens/Signup.js", "Data/Product1.js", "Data/Product1.js"  ]
 }

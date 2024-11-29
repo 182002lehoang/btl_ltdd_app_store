@@ -1,115 +1,74 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Image } from 'react-native';
-import { useRoute, RouteProp } from '@react-navigation/native';
-import { RootStackParamList } from '../components/types';
+import React, { useEffect, useState } from 'react';
+import { View, Text, FlatList, StyleSheet } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-type OrdersScreenRouteProp = RouteProp<RootStackParamList, 'OdersScreen'>;
+const OdersScreen = () => {
+    interface Order {
+        address: {
+            address: string;
+        };
+        shippingOption: string;
+        totalAmount: number;
+    }
 
-const OrdersScreen = () => {
-    const route = useRoute<OrdersScreenRouteProp>();
-    const { orderDetails } = route.params;
+    const [orders, setOrders] = useState<Order[]>([]);
 
-    const { products, address, shippingOption, totalAmount } = orderDetails;
+    useEffect(() => {
+        const loadOrders = async () => {
+            try {
+                const storedOrders = JSON.parse(await AsyncStorage.getItem('orders') || '[]');
+                setOrders(storedOrders);
+                console.log('Dữ liệu đơn hàng từ AsyncStorage:', storedOrders);
+            } catch (error) {
+                console.error('Lỗi khi tải dữ liệu đơn hàng:', error);
+            }
+        };
 
-    
+        loadOrders();
+    }, []);
 
     return (
-        <ScrollView style={styles.container}>
-            <Text style={styles.title}>Thông tin Đơn Hàng</Text>
-
-            {/* Hiển thị Địa chỉ */}
-            <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Địa chỉ giao hàng</Text>
-                <Text style={styles.text}>{address.name}</Text>
-                <Text style={styles.text}>{address.phone}</Text>
-                <Text style={styles.text}>{address.address}</Text>
-            </View>
-
-            {/* Hiển thị Sản phẩm */}
-            <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Sản phẩm</Text>
-                {products.map((product) => (
-                    <View key={product.product_id} style={styles.productContainer}>
-                        <Image source={{ uri: product.image }} style={styles.productImage} />
-                        <View>
-                            <Text style={styles.productName}>{product.product_name}</Text>
-                            <Text style={styles.productQuantity}>x{product.quantity_pur}</Text>
-                            <Text style={styles.productPrice}>
-                                {(product.price * product.quantity_pur).toLocaleString()} VND
-                            </Text>
-                        </View>
+        <View style={styles.container}>
+            <Text style={styles.header}>Danh sách đơn hàng</Text>
+            <FlatList
+                data={orders}
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={({ item }) => (
+                    <View style={styles.orderItem}>
+                        <Text style={styles.orderTitle}>Địa chỉ: {item.address.address}</Text>
+                        <Text style={styles.orderDetail}>Phí giao hàng: {item.shippingOption}</Text>
+                        <Text style={styles.orderDetail}>Tổng cộng: {item.totalAmount.toLocaleString()} VND</Text>
                     </View>
-                ))}
-            </View>
-
-            {/* Hiển thị Tùy chọn Giao hàng */}
-            <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Tùy chọn giao hàng</Text>
-                <Text style={styles.text}>{shippingOption}</Text>
-            </View>
-
-            {/* Hiển thị Tổng tiền */}
-            <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Tổng tiền</Text>
-                <Text style={styles.totalAmount}>{totalAmount.toLocaleString()} VND</Text>
-            </View>
-            
-        </ScrollView>
+                )}
+            />
+        </View>
     );
 };
-
-export default OrdersScreen;
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f8f8f8',
-        padding: 10,
-    },
-    title: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginBottom: 10,
-    },
-    section: {
-        marginBottom: 20,
+        padding: 20,
         backgroundColor: '#fff',
-        padding: 10,
-        borderRadius: 8,
     },
-    sectionTitle: {
-        fontSize: 16,
+    header: {
+        fontSize: 24,
         fontWeight: 'bold',
-        marginBottom: 10,
+        marginBottom: 20,
     },
-    text: {
-        fontSize: 14,
-        marginBottom: 5,
+    orderItem: {
+        padding: 15,
+        borderBottomWidth: 1,
+        borderBottomColor: '#ccc',
     },
-    productContainer: {
-        flexDirection: 'row',
-        marginBottom: 10,
-    },
-    productImage: {
-        width: 80,
-        height: 80,
-        marginRight: 10,
-    },
-    productName: {
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-    productQuantity: {
-        fontSize: 14,
-    },
-    productPrice: {
-        fontSize: 14,
-        fontWeight: 'bold',
-        color: '#333',
-    },
-    totalAmount: {
+    orderTitle: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#000',
+    },
+    orderDetail: {
+        fontSize: 16,
+        color: '#555',
     },
 });
+
+export default OdersScreen;

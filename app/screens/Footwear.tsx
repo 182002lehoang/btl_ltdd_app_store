@@ -9,55 +9,93 @@ import {
     Pressable,
 } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../components/types';
-import Product from '../Data/Product';
+import Product1 from '../Data/Product1';
 
 const Footwear = () => {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-    
-    // Lọc sản phẩm chỉ thuộc danh mục "Clothes"
-    // const clothesProducts = Product.filter((item) =>
-    //     item.category.includes('Clothes')
-    // );
-    
-    const [products, setProducts] = React.useState<{ product_name: string; price: number; image: string; sale: number; quantity: number; sold: number; star: number; category: string[]; type: string[]; product_id: string; }[]>([]);
+    const [products, setProducts] = React.useState<Product1[]>([]);
 
+    // Lưu dữ liệu vào AsyncStorage (chỉ chạy 1 lần nếu chưa có dữ liệu)
     React.useEffect(() => {
-        setProducts(Product);
+        const saveDataToLocal = async () => {
+            const existingData = await AsyncStorage.getItem('Product1');
+            if (!existingData) {
+                await AsyncStorage.setItem('Product1', JSON.stringify(Product1));
+            }
+        };
+        saveDataToLocal();
     }, []);
-    const renderProduct = ({ item }: { item: typeof Product[0] }) => (
-        <Pressable style={styles.productItem} onPress={() => navigation.navigate('ProductDetailsScreen', { product: item })}>
+    // const removeProduct1FromLocal = async () => {
+    //     try {
+    //         await AsyncStorage.removeItem('Product1');
+    //         console.log('Dữ liệu Product1 đã bị xóa khỏi AsyncStorage');
+    //     } catch (error) {
+    //         console.error('Lỗi khi xóa dữ liệu Product1:', error);
+    //     }
+    // };
+
+    // Đọc dữ liệu từ AsyncStorage
+    React.useEffect(() => {
+        const loadDataFromLocal = async () => {
+            const storedData = await AsyncStorage.getItem('Product1');
+            console.log(Product1);
+            console.log('Dữ liệu trong AsyncStorage:', JSON.parse(storedData || '[]'));
+            if (storedData) {
+                setProducts(JSON.parse(storedData));
+            }
+        };
+        loadDataFromLocal();
+    }, []);
+
+    // Render từng sản phẩm
+    const renderProduct = ({ item }: { item: Product1 }) => (
+        <Pressable
+            style={styles.productItem}
+            onPress={() => navigation.navigate('ProductDetailsScreen', { product: item })}
+        >
             <View>
                 <View style={{ alignItems: 'center' }}>
                     <Image source={{ uri: item.image }} style={styles.productImage} />
                 </View>
                 <Text style={styles.productName}>{item.product_name}</Text>
-                <View style={{ flexDirection: "row", alignItems: 'center' }}>
-                    <Text style={styles.productPrice}>{item.price.toLocaleString()} VND</Text>
-                    <Text style={{ marginLeft: 20, marginTop: 5, color: "red" }}>-{item.sale}%</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Text style={styles.productPrice}>
+                        {item.price.toLocaleString()} VND
+                    </Text>
+                    <Text style={styles.productSale}>-{item.sale}%</Text>
                 </View>
-                <View style={{ flexDirection: "row", marginTop: 10, justifyContent: 'space-between', alignItems: 'center' }}>
+                <View
+                    style={{
+                        flexDirection: 'row',
+                        marginTop: 10,
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                    }}
+                >
                     <View style={{ flexDirection: 'row' }}>
                         <AntDesign name="star" size={20} color="#FFD700" />
                         <Text style={styles.productStar}>{item.star}</Text>
                     </View>
-                    <Text style={{}}>Đã bán: {item.sold}</Text>
+                    <Text>Đã bán: {item.sold}</Text>
                 </View>
+                
             </View>
         </Pressable>
     );
 
     return (
         <SafeAreaView style={styles.container}>
-            <Text style={styles.title}>Footwear</Text>
+            <Text style={styles.title}>giay </Text>
             <FlatList
-              data={products}
-              renderItem={renderProduct}
-              keyExtractor={(item) => item.product_id.toString()}
-              numColumns={2}
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.body}
+                data={products}
+                renderItem={renderProduct}
+                keyExtractor={(item) => item.product_id.toString()}
+                numColumns={2}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.body}
             />
         </SafeAreaView>
     );
@@ -77,9 +115,6 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginVertical: 20,
         color: '#333',
-    },
-    listContainer: {
-        paddingBottom: 20,
     },
     productItem: {
         flex: 1,
@@ -101,38 +136,20 @@ const styles = StyleSheet.create({
         marginTop: 10,
         color: '#333',
     },
-    priceWrapper: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginTop: 5,
-    },
     productPrice: {
         fontSize: 14,
         color: '#006AF5',
     },
     productSale: {
+        marginLeft: 10,
+        marginTop: 5,
         fontSize: 14,
         color: 'red',
-    },
-    ratingWrapper: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginTop: 10,
-    },
-    starWrapper: {
-        flexDirection: 'row',
-        alignItems: 'center',
     },
     productStar: {
         fontSize: 14,
         color: '#FFD700',
         marginLeft: 5,
-    },
-    soldText: {
-        fontSize: 12,
-        color: '#666',
     },
     body: {
         paddingBottom: 200,
